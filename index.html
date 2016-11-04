@@ -14,7 +14,8 @@
     <script type="text/javascript" src="js/tween.js"></script>
     <script type="text/javascript" src="js/cvsAnimate.js"></script>
     <script type="text/javascript">
-       cvsAnimate.scatterIn($('#contain')[0],'images/1.jpg');
+       cvsAnimate.scatterIn($('#contain')[0],'images/1.jpg',{tween:Tween.Cubic.easeInOut});
+       //,originRangeBox:{x:120,y:400,w:1,h:1}
     </script>
 </body>
 
