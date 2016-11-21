@@ -1,7 +1,6 @@
 ;
 //create by 栾树崇
 //canvas 动画静态函数库
-
 //requestAnimationFrame兼容
 (function() {
     var lastTime = 0;
@@ -61,91 +60,102 @@ function Animate(func, duration, tween) {
 var cvsAnimate = {};
 cvsAnimate.tools = {};
 cvsAnimate.tools.extend = function(target, options) {
-    for (name in options) {
-        copy = options[name];
-        if (copy instanceof Array) {
-            target[name] = arguments.callee([], copy);
-        } else if (copy instanceof Object && !(copy instanceof Function)) {
-            target[name] = arguments.callee({}, copy);
-        } else {
-            target[name] = options[name];
-        }
-    }
-    return target;
-}
-
-//动画
-//分散粒子，进入
-cvsAnimate.scatterIn = function(elem, imgurl, options) {
-    var self = this;
-    var defaults = {
-        width: elem.clientWidth, //canvas的大小
-        height: elem.clientHeight, //canvas的大小
-        duration: 3000, //动画持续时间
-        cols: elem.clientWidth / 4, //imgBox.w/2，粒子列数
-        rows: elem.clientHeight / 4, //imgBox.h/2，粒子行数
-        imgBox: { x: elem.clientWidth / 4, y: 0, w: elem.clientWidth / 2, h: elem.clientHeight / 2 }, //图像显示位置盒子
-        originRangeBox: { x: -elem.clientWidth, y: -elem.clientWidth, w: elem.clientWidth * 3, h: elem.clientHeight * 3 }, //粒子初始位置盒子
-    }
-    if (options) {
-        options.imgBox && options.imgBox.w && options.cols && (options.cols = options.imgBox.w / 2);
-        options.imgBox && options.imgBox.h && options.rows && (options.rows = options.imgBox.h / 2);
-        cvsAnimate.tools.extend(defaults, options);
-    }
-    var c = document.createElement('canvas');
-    c.width = defaults.width;
-    c.height = defaults.height;
-    var ctx = c.getContext("2d");
-    this.particles = []; //粒子数组最好不要超过30万个，否则很可能会卡
-    var img = new Image();
-    img.onload = function() {
-            var c = document.createElement('canvas');
-            c.width = defaults.imgBox.w;
-            c.height = defaults.imgBox.h;
-            var ctx = c.getContext("2d");
-            ctx.drawImage(this, 0, 0, this.width, this.height, 0, 0, c.width, c.height);
-            var cw = Math.ceil(c.width / defaults.cols);
-            var rh = Math.ceil(c.height / defaults.rows);
-            var imageData = ctx.getImageData(0, 0, c.width, c.height);
-            var data = imageData.data;
-            var pos = 0;
-            for (var i = 0; i < defaults.cols; i++)
-                for (var j = 0; j < defaults.rows; j++) {
-                    pos = (j * rh * c.width + i * cw) * 4;
-                    var particle = {
-                        ox: defaults.originRangeBox.x + defaults.originRangeBox.w * Math.random(),
-                        oy: defaults.originRangeBox.y + defaults.originRangeBox.h * Math.random(),
-                        x: i * cw,
-                        y: j * rh,
-                        delay: defaults.duration * Math.random(), //粒子延迟处理时间，调整它可以出现不同动画效果
-                        fillStyle: 'rgba(' + data[pos++] + ', ' + data[pos++] + ', ' + data[pos++] + ',' + data[pos++] / 255 + ')'
-                    };
-                    self.particles.push(particle);
-                }
-            Animate(function(t) {
-                draw(self.particles, cw, rh, t);
-            }, defaults.duration, defaults.tween || null);
-        }
-        //img.crossOrigin = "anonymous";
-    img.src = imgurl;
-    elem.appendChild(c);
-
-    function draw(p, w, h, t) {
-        var t1 = new Date();
-        ctx.clearRect(0, 0, c.width, c.height);
-        for (var i in p) {
-            ctx.fillStyle = p[i].fillStyle;
-            var zb = p[i].delay / defaults.duration;
-            var dt = t - zb;
-            if (dt >= 0) {
-                var temp = qBerzier([p[i].ox, p[i].oy], [200, 200], [defaults.imgBox.x + p[i].x, defaults.imgBox.y + p[i].y], dt / (1 - zb));
-                ctx.fillRect(temp[0], temp[1], w, h);
+        var src,copy;
+        for (name in options) {
+            src = target[name];
+            copy = options[name];
+            // Prevent never-ending loop
+            if (target === copy) {
+                continue;
+            }
+            if (copy instanceof Array) {
+                if(src instanceof Array)
+                    target[name] = arguments.callee(src, copy);
+                else
+                    target[name] = arguments.callee([], copy);
+            } else if (Object.prototype.toString.call(copy)=="[object Object]") {
+                if(Object.prototype.toString.call(src)=="[object Object]")
+                    target[name] = arguments.callee(src, copy);
+                else
+                    target[name] = arguments.callee({}, copy);
+            } else {
+                target[name] = copy;
             }
         }
-        var t2 = new Date();
-        console.log('画一次用的时间:' + (t2 - t1) + 'ms');
+        return target;
     }
-}
+    //动画
+    //分散粒子，进入
+cvsAnimate.scatterIn = function(elem, imgurl, options) {
+        var self = this;
+        var defaults = {
+            width: elem.clientWidth, //canvas的大小
+            height: elem.clientHeight, //canvas的大小
+            duration: 3000, //动画持续时间
+            cols: elem.clientWidth / 4, //imgBox.w/2，粒子列数
+            rows: elem.clientHeight / 4, //imgBox.h/2，粒子行数
+            imgBox: { x: elem.clientWidth / 4, y: 0, w: elem.clientWidth / 2, h: elem.clientHeight / 2 }, //图像显示位置盒子
+            originRangeBox: { x: -elem.clientWidth, y: -elem.clientWidth, w: elem.clientWidth * 3, h: elem.clientHeight * 3 }, //粒子初始位置盒子
+        }
+        if (options) {
+            options.imgBox && options.imgBox.w && options.cols && (options.cols = options.imgBox.w / 2);
+            options.imgBox && options.imgBox.h && options.rows && (options.rows = options.imgBox.h / 2);
+            cvsAnimate.tools.extend(defaults, options);
+        }
+        var c = document.createElement('canvas');
+        c.width = defaults.width;
+        c.height = defaults.height;
+        var ctx = c.getContext("2d");
+        this.particles = []; //粒子数组最好不要超过30万个，否则很可能会卡
+        var img = new Image();
+        img.onload = function() {
+                var c = document.createElement('canvas');
+                c.width = defaults.imgBox.w;
+                c.height = defaults.imgBox.h;
+                var ctx = c.getContext("2d");
+                ctx.drawImage(this, 0, 0, this.width, this.height, 0, 0, c.width, c.height);
+                var cw = Math.ceil(c.width / defaults.cols);
+                var rh = Math.ceil(c.height / defaults.rows);
+                var imageData = ctx.getImageData(0, 0, c.width, c.height);
+                var data = imageData.data;
+                var pos = 0;
+                for (var i = 0; i < defaults.cols; i++)
+                    for (var j = 0; j < defaults.rows; j++) {
+                        pos = (j * rh * c.width + i * cw) * 4;
+                        var particle = {
+                            ox: defaults.originRangeBox.x + defaults.originRangeBox.w * Math.random(),
+                            oy: defaults.originRangeBox.y + defaults.originRangeBox.h * Math.random(),
+                            x: i * cw,
+                            y: j * rh,
+                            delay: defaults.duration * Math.random(), //粒子延迟处理时间，调整它可以出现不同动画效果
+                            fillStyle: 'rgba(' + data[pos++] + ', ' + data[pos++] + ', ' + data[pos++] + ',' + data[pos++] / 255 + ')'
+                        };
+                        self.particles.push(particle);
+                    }
+                Animate(function(t) {
+                    draw(self.particles, cw, rh, t);
+                }, defaults.duration, defaults.tween || null);
+            }
+            //img.crossOrigin = "anonymous";
+        img.src = imgurl;
+        elem.appendChild(c);
+
+        function draw(p, w, h, t) {
+            var t1 = new Date();
+            ctx.clearRect(0, 0, c.width, c.height);
+            for (var i in p) {
+                ctx.fillStyle = p[i].fillStyle;
+                var zb = p[i].delay / defaults.duration;
+                var dt = t - zb;
+                if (dt >= 0) {
+                    var temp = qBerzier([p[i].ox, p[i].oy], [200, 200], [defaults.imgBox.x + p[i].x, defaults.imgBox.y + p[i].y], dt / (1 - zb));
+                    ctx.fillRect(temp[0], temp[1], w, h);
+                }
+            }
+            var t2 = new Date();
+            console.log('画一次用的时间:' + (t2 - t1) + 'ms');
+        }
+    }
     // cvsAnimate.skewIn = function(elem, imgurl, options) {
     //         default = {
     //             mode: 'lt2rb', //左上到右下，
