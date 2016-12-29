@@ -6,16 +6,36 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
     <title>cvszoom</title>
 </head>
-<body style="width:100%;height:100%;">
-    <div id="contain" style="position: absolute;top:0;right:0;left:0;bottom:0;margin:auto;width:100%;height:100%;background-color: #eee;">
+<style type="text/css">
+html,
+body {
+    width: 100%;
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+</style>
+
+<body>
+    <p>例1：图片分散粒子动画↓</p>
+    <div id="contain1" style="width:100vw;height:80vh;background-color: #000;">
+    </div>
+    <p>例2：点线随机动画↓</p>
+    <div id="contain2" style="width:100vw;height:80vh;background-color: #000;">
     </div>
     <script type="text/javascript" src="js/debug.js"></script>
     <script type="text/javascript" src="js/jquery-2.2.3.min.js"></script>
     <script type="text/javascript" src="js/tween.js"></script>
     <script type="text/javascript" src="js/cvsAnimate.js"></script>
     <script type="text/javascript">
-       cvsAnimate.scatterIn($('#contain')[0],'images/1.jpg',{tween:Tween.Cubic.easeInOut});
-       //,originRangeBox:{x:120,y:400,w:1,h:1}
+    function s1() {
+        cvsAnimate.scatterIn($('#contain1')[0], 'images/1.jpg', {
+            tween: Tween.Cubic.easeInOut
+        }, s1);
+    }
+    s1();
+
+    cvsAnimate.DotAndLine($('#contain2')[0]);
     </script>
 </body>
 
