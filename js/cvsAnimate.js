@@ -168,7 +168,7 @@ cvsAnimate.scatterIn = function(elem, imgurl, options, callback) {
         }
     }
     //canvas 点线随机动画
-cvsAnimate.DotAndLine = function(elem, options, callback) {
+cvsAnimate.DotAndLine = function(elem, options) {
         var canvas_el = elem.querySelector('canvas') || document.createElement('canvas');
         elem.appendChild(canvas_el);
         canvas_el.width = elem.clientWidth;
