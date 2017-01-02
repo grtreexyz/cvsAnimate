@@ -28,6 +28,7 @@ function qBerzier(p0, p1, p2, t) {
     return [x, y];
 }
 //动画函数
+//func每次执行的函数传入动画进度0-1，duration动画持续时间，tween动画缓动函数
 function Animate(func, duration, tween, callback) {
     var startTime = new Date().getTime();
     func(0);
@@ -181,17 +182,17 @@ cvsAnimate.DotAndLine = function(elem, options) {
                 h: canvas_el.offsetHeight
             },
             particles: {
-                color: '#ffffff',
+                color: '#fff',
                 shape: 'circle', // "circle"圆, "edge"方块 or "triangle"三角
-                opacity: 1,
-                size: 5,
+                opacity: 0.4,
+                size: 6,
                 size_random: true,
                 nb: 30, //个数
                 line_linked: {
                     enable_auto: true,
-                    distance: 150,
-                    color: '#ffffff',
-                    opacity: 1,
+                    distance: 250,
+                    color: '#fff',
+                    opacity: 0.6,
                     width: 1,
                     condensed_mode: {
                         enable: true,
@@ -496,76 +497,84 @@ cvsAnimate.DotAndLine = function(elem, options) {
         //     pJS.fn.vendors.interactivity.listeners();
         // }
     }
+    //光斑
+cvsAnimate.lightspot = function(elem, imgObj) {
+    var c = elem.querySelector('canvas') || document.createElement('canvas');
+    elem.appendChild(c);
+    c.width = elem.clientWidth;
+    c.height = elem.clientHeight;
+    var self=this;
+    self.img=imgObj;
+    var ctx = c.getContext("2d");
+    this.sprite=function(img,duration){
+        this.p0 = [((c.width-40)* Math.random() >> 0), c.height-150-(100 * Math.random() >> 0)];
+        var temp = Math.random();
+        this.w = 15 + 55 * temp >> 0;
+        this.h = 15 + 55 * temp >> 0;
+        if (Math.random() > 0.9) {
+            this.w += 35;
+            this.h += 35;
+        }
+        this.buchang = 50;
+        this.t = 0;
+        this.x = this.p0[0];
+        this.y = this.p0[1];
+        this.img = img;
+        this.duration=duration;
+    };
+    this.sprite.prototype.draw = function() {
+        //运动路径
+        this.x = this.p0[0];
+        this.y = this.p0[1]-this.t/this.duration*c.height;
+        ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
+        this.t+=this.buchang;
+        //EvenCompEllipse(this.ctx,this.x,this.y,(1.1-this.t)*this.w,(1.1-this.t)*this.h);
+        //this.ctx.shadowBlur=20+20*this.temp>>0;
+        //this.ctx.shadowOffsetY=10*this.temp>>0;
+        //var p=Math.sin(this.temp*2*Math.PI+this.t*6*Math.PI);
+        //p=p<0.3?0.3:p;
+        //this.ctx.shadowColor='rgba(255,255,0,1)';
+        //this.ctx.fillStyle='rgba(255,255,255,'+p+')';
+        //this.ctx.fill();
+    }
+
+    var IntervalOut;
+    this.gbanimation = function() {
+        var imgs=[];
+        imgs[0]=self.img;
+        var animateArray = [];
+        var duration;
+        var times=0;
+        for (var i = 0; i < 5; i++) {
+            duration = 4000 + 3500 * Math.random() >> 0;
+            var img = imgs[imgs.length * Math.random() >> 0];
+            animateArray.push(new self.sprite(img, duration));
+        }
+        IntervalOut = setInterval(function() {
+            //var oldtime=new Date().getTime();
+            ctx.clearRect(0, 0, c.width, c.height);
+            times++;
+            while(times==4){
+            duration = 4000 + 2500 * Math.random() >> 0;
+            img = imgs[imgs.length * Math.random() >> 0];
+            animateArray.push(new self.sprite(img, duration));
+            times=0;
+            }
+            for (var i = 0; i < animateArray.length; i++) {
+                animateArray[i].draw();
+                if (animateArray[i].y < -60) {
+                    animateArray.splice(i, 1);
+                    i--;
+                }
+            }
+        }, 50);
+    }
+
+    this.gbstop=function() {
+        clearInterval(IntervalOut);
+    }
+
+    this.gbanimation();
+}
 
 
-
-
-    // cvsAnimate.skewIn = function(elem, imgurl, options) {
-    //         default = {
-    //             mode: 'lt2rb', //左上到右下，
-    //             width: elem.clientWidth,
-    //             height: elem.clientHeight,
-    //             duration: 1000,
-    //             animationInterval: 40
-    //         }
-    //         cvsAnimate.tools.extend(default, options);
-    //         var c = document.createElement('canvas');
-    //         c.width = default.width;
-    //         c.height = default.height;
-    //         var wb = Math.round(c.width / (default.duration / default.animationInterval)); //宽的步长
-    //         var hb = Math.round(c.height / (default.duration / default.animationInterval)); //宽的步长
-    //         var ctx = c.getContext("2d");
-    //         ctx.clearRect(0, 0, c.width, c.height);
-    //         var img = new Image();
-    //         img.onload = function() {
-    //             var ix = 0,
-    //                 iy = 0;
-    //             var IntervalOut = setInterval(function() {
-    //                 ctx.drawImage(img, ix, 0, buchang, ch, ix, 0, buchang, ch);
-    //                 if (ix >= cw) clearInterval(IntervalOut);
-    //                 else ix += buchang;
-    //                 if (ix > cw) ix = cw;
-    //             }, options.animationInterval);
-    //         }
-    //         img.src = imgurl;
-    //     }
-    // cvsAnimate.printIn = function(canvasid, imgsrc, duration) {
-    //     var c = document.getElementById(canvasid);
-    //     var cw = c.width;
-    //     var ch = c.height;
-    //     var buchang = Math.round(cw / (duration / 50));
-    //     var ctx = c.getContext("2d");
-    //     ctx.clearRect(0, 0, cw, ch);
-    //     var img = new Image();
-    //     img.onload = function() {
-    //         var ix = 0,
-    //             iy = 0;
-    //         var IntervalOut = setInterval(function() {
-    //             ctx.drawImage(img, ix, 0, buchang, ch, ix, 0, buchang, ch);
-    //             if (ix >= cw) clearInterval(IntervalOut);
-    //             else ix += buchang;
-    //             if (ix > cw) ix = cw;
-    //         }, 50);
-    //     }
-    //     img.src = imgsrc;
-    // }
-    // function DownCaRu(canvasid, imgsrc, duration) {
-    //     var c = document.getElementById(canvasid);
-    //     var cw = c.width;
-    //     var ch = c.height;
-    //     var buchang = Math.round(ch / (duration / 50));
-    //     var ctx = c.getContext("2d");
-    //     ctx.clearRect(0, 0, cw, ch);
-    //     var img = new Image();
-    //     img.onload = function() {
-    //         var ix = 0,
-    //             iy = ch;
-    //         var IntervalOut = setInterval(function() {
-    //             ctx.drawImage(img, ix, iy, cw, buchang, ix, iy, cw, buchang);
-    //             if (iy == 0) clearInterval(IntervalOut);
-    //             else iy -= buchang;
-    //             if (iy < 0) iy = 0;
-    //         }, 50);
-    //     }
-    //     img.src = imgsrc;
-    // }
